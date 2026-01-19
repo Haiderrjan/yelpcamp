@@ -1,0 +1,30 @@
+What we did in this part of yelpcamp
+section 44 - 46 of colt steele course
+
+1. talked about data relaitonship with mongo
+    - one to few
+    - one to many
+    - one to billions
+    - many to many
+    - mongo schema design 
+    - mongoose populate
+
+2. Mongo relaitonship with expressjs
+    - how to setup relaitonship with two different models in mongo e.g was farm model and product model.
+    - middleware in mongo to delete from one model and also another model 
+
+
+3. adding a review model in yelpcamp
+    - adding a review model
+    - creeating a review form 
+    - validating reviews
+    - displaying reviews
+    -styling using boostrap
+    - deleting reviews using middleware 
+    - adding it to our delete method in index 
+
+
+
+
+
+
