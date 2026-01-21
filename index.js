@@ -1,20 +1,26 @@
 const express = require('express')
 const app = express()
 const port = 8080;
-
 const mongoose = require('mongoose')
-
 const path = require('path')
 const methodOverride = require('method-override')
-
 const ejsMate = require('ejs-mate')
 const ExpressError = require('./utils/ExpressError');
-
-const campgroundRoutes = require('./routes/campground.js')
-const reviewsRoutes = require('./routes/reviews.js')
-
 const session = require('express-session')
 const flash = require('connect-flash')
+const passport = require('passport')
+const localStrategy = require('passport-local')
+
+
+const User = require('./models/user')
+
+const campgroundRoutes = require('./routes/campground.js')
+const reviewsRoutes = require('./routes/reviews.js');
+const userRoutes = require('./routes/users.js');
+
+
+
+
 
 mongoose.connect('mongodb://127.0.0.1:27017/Yelp-camp');
 
@@ -25,16 +31,6 @@ db.on('error', console.error.bind(console, "connection error:"))
 db.once('open', () => {
     console.log('Database connected');
 })
-
-app.engine('ejs', ejsMate)
-app.set('views', path.join(__dirname, "views"));
-app.set('view engine', "ejs")
-
-app.use(express.urlencoded({ extended: true }))
-app.use(methodOverride('__method'))
-app.use(express.static(path.join(__dirname, 'public')))
-
-
 
 const sessionConfig = {
     secret: 'better-secret',
@@ -47,8 +43,26 @@ const sessionConfig = {
      }
 }
 
+
 app.use(session(sessionConfig))
 app.use(flash())
+
+app.engine('ejs', ejsMate)
+app.set('views', path.join(__dirname, "views"));
+app.set('view engine', "ejs")
+
+app.use(express.urlencoded({ extended: true }))
+app.use(methodOverride('__method'))
+app.use(express.static(path.join(__dirname, 'public')))
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.use(new localStrategy(User.authenticate())) //telling passport to use local Strategy 
+
+passport.serializeUser(User.serializeUser()) // how we serialize a user to a session
+passport.deserializeUser(User.deserializeUser()) // how we deserialize a user from a session
+
 
 
 
@@ -60,12 +74,16 @@ app.use((req,res,next) => {
 })
 
 
-app.get('/', (req, res) => {
-    res.render('index')
-})
+
 
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/reviews',reviewsRoutes)
+app.use('/', userRoutes)
+
+
+app.get('/', (req, res) => {
+    res.render('index')
+})
 
 
 
