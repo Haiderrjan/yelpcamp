@@ -18,23 +18,29 @@
             <%= campground.price%>
           </li>
           <li class="list-group-item">
+           submitted by <%= campground.author.username%>
+          </li>
+          <li class="list-group-item">
             <%= campground.description%>
           </li>
         </ul>
-        <div class="card-body">
 
+        <% if (currentUser && campground.author.equals(currentUser.id)){ %>
+        <div class="card-body">
           <a class="card-link btn btn-info" href="/campgrounds/<%= campground.id%>/edit">edit</a>
           <form class="d-inline" action="/campgrounds/<%=campground.id%>?__method=DELETE" method="POST">
             <button class="btn btn-danger">delete</button>
           </form>
-
         </div>
+        <% } %>
 
       </div>
      
     </div>
 
+   
       <div class="col-6 mt-4">
+         <% if (currentUser ){ %>
          <h2>Leave us a Review!</h2>
       <form action="/campgrounds/<%=campground.id%>/reviews" class="mb-3 validated-form" method="post" novalidate>
         <div class="mb-3">
@@ -47,10 +53,11 @@
           <div class="valid-feedback">
             Looks good!
           </div>
-
+        
         </div>
         <button class="btn btn-success">Sumbit</button>
       </form>
+      <% } %>
 
    <% for (let review of campground.reviews){ %>
         <div class="card mb-4">

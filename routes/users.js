@@ -16,7 +16,6 @@ router.post('/register', catchAsync(async (req, res,) => {
         const { email, username, password,} = req.body
         const user = new User({ email, username })
         const registeredUser = await User.register(user, password)
-
         req.flash('success', "thanks for registering please log in again")
         res.redirect('/login')
     }catch(e){
@@ -31,7 +30,7 @@ router.get('/login', (req,res) => {
 })
 
 
-router.post('/login', storeReturnTo,passport.authenticate('local',{failureFlash:true, failureRedirect: '/login'}), (req,res) => {
+router.post('/login', storeReturnTo,passport.authenticate('local',{failureFlash:true, failureRedirect: '/login', keepSessionInfo: true}), (req,res) => {
     req.flash('success', 'welcome back')
    const redirectURL =  res.locals.returnTo  || '/campgrounds'
     res.redirect(redirectURL)

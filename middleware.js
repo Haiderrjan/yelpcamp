@@ -1,7 +1,9 @@
-module.exports.isLoggedIn = (req,res,next) => {
+const { campgroundSchema, reviewSchema } = require('./schemas.js') // joi schema for validating
+const ExpressError = require('./utils/ExpressError.js')
+const Campground = require('./models/campground.js')
 
-   
-    
+
+module.exports.isLoggedIn = (req,res,next) => {
     if (!req.isAuthenticated()) {
          req.session.returnTo = req.originalURL
         req.flash('error', 'you must be signed in')
@@ -16,4 +18,43 @@ module.exports.storeReturnTo = (req, res, next) => {
         res.locals.returnTo = req.session.returnTo;
     }
     next();
+}
+
+
+
+module.exports.validateCampground = (req, res, next) => {
+
+    const { error } = campgroundSchema.validate(req.body)
+
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+}
+
+// middleware to see if authorized 
+module.exports.isAuthor = async(req,res,next)  => {
+    const {id} = req.params 
+    const campground = await Campground.findById(id)
+    if (!campground.author.equals(req.user.id)) {
+        req.flash('error', 'you do not have permission')
+        return res.redirect(`/campgrounds`)
+    }
+    next()
+
+}
+
+
+
+module.exports.validateReview = (req, res, next) => {
+    const { error } = reviewSchema.validate(req.body)
+
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
 }
