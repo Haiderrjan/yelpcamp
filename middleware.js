@@ -1,6 +1,8 @@
 const { campgroundSchema, reviewSchema } = require('./schemas.js') // joi schema for validating
 const ExpressError = require('./utils/ExpressError.js')
 const Campground = require('./models/campground.js')
+const Review = require('./models/review.js')
+
 
 
 module.exports.isLoggedIn = (req,res,next) => {
@@ -46,6 +48,18 @@ module.exports.isAuthor = async(req,res,next)  => {
 
 }
 
+// middleware to see if authorized 
+module.exports.isReviewAuthor = async(req,res,next)  => {
+    const {id, reviewId} = req.params 
+    const review = await Review.findById(reviewId)
+    if (!review.author.equals(req.user.id)) {
+        req.flash('error', 'you do not have permission')
+        return res.redirect(`/campgrounds${id}`)
+    }
+    next()
+
+}
+
 
 
 module.exports.validateReview = (req, res, next) => {
@@ -58,3 +72,4 @@ module.exports.validateReview = (req, res, next) => {
         next();
     }
 }
+
