@@ -1,3 +1,9 @@
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config()
+}
+
+
+
 const express = require('express')
 const app = express()
 const port = 8080;
@@ -98,6 +104,7 @@ app.all(/(.*)/, (req, res, next) => {
 
 app.use((err, req, res, next) => {
     // const {status = 500, message = "Something went wrong"} = err;
+    console.log(err);
     const { status = 400 } = err;
     if (!err.message) {
         err.message = "Oh No Something Went Wrong"

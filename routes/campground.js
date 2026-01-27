@@ -5,18 +5,24 @@ const { isLoggedIn, validateCampground,isAuthor } = require('../middleware.js')
 const campgrounds = require('../controllers/campgrounds.js');
 
 
+// cloud image storage
+const multer  = require('multer')
+const {storage} = require('../cloudinary')
+const upload = multer({storage })
+
 router.get('/', catchAsync(campgrounds.index))
 
 router.get('/new', isLoggedIn, campgrounds.renderNewForm)
 
-router.post('/', isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+router.post('/', isLoggedIn, validateCampground,upload.array('image'), catchAsync(campgrounds.createCampground))
+
 
 router.get('/:id', catchAsync(campgrounds.showCampground))
 
 
 router.get('/:id/edit',isLoggedIn,isAuthor, catchAsync(campgrounds.renderEditcampground))
 
-router.put('/:id',isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.editCampground))
+router.put('/:id',isLoggedIn, isAuthor,upload.array('image'),validateCampground, catchAsync(campgrounds.editCampground))
 
 router.delete('/:id', isLoggedIn,isAuthor, catchAsync(campgrounds.deleteCampground))
 
