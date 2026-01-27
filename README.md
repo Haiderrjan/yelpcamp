@@ -7,7 +7,7 @@ A Crud application for Campgrounds
 
 n/a
 
----
+
 
 ## 🧠 Features
 - ➕ **Login Features** - Login features and Logout
@@ -16,7 +16,7 @@ n/a
 - ➕ **remove Campground** - option to remove Campground
 - ➕ **Add reviews** - Able to add reviews via each campground (only logged in)
 
----
+
 
 ## 🧱 Built With
 
@@ -27,7 +27,7 @@ n/a
 - **Bootstrap CSS**
 
 
----
+
 
 
 
