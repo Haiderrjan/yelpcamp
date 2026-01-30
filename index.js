@@ -16,14 +16,17 @@ const session = require('express-session')
 const flash = require('connect-flash')
 const passport = require('passport')
 const localStrategy = require('passport-local')
-
+const sanitizeV5 = require('./utils/mongoSanitizeV5.js')
+const helmet = require('helmet')
 
 const User = require('./models/user')
-
 const campgroundRoutes = require('./routes/campground.js')
 const reviewsRoutes = require('./routes/reviews.js');
 const userRoutes = require('./routes/users.js');
 
+
+
+app.set('query parser', 'extended');
 
 
 
@@ -39,11 +42,13 @@ db.once('open', () => {
 })
 
 const sessionConfig = {
+    name: 'session',
     secret: 'better-secret',
     resave: false,
      saveUninitialized: true,
      cookies: {
         httpOnly: true,
+        // secure: true,
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7 ,
         maxAge: 1000 * 60 * 60 * 24 * 7 
      }
@@ -61,6 +66,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('__method'))
 app.use(express.static(path.join(__dirname, 'public')))
 
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -69,11 +75,49 @@ passport.use(new localStrategy(User.authenticate())) //telling passport to use l
 passport.serializeUser(User.serializeUser()) // how we serialize a user to a session
 passport.deserializeUser(User.deserializeUser()) // how we deserialize a user from a session
 
+app.use(sanitizeV5({ replaceWith: '_' }));
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+];
+//This is the array that needs added to
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net",
+];
+const connectSrcUrls = [];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dqkmnkkb2/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://picsum.photos/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
 
 
 
 app.use((req,res,next) => {
-    // console.log(req.session);
+    console.log(req.query);
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
@@ -103,7 +147,6 @@ app.all(/(.*)/, (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    // const {status = 500, message = "Something went wrong"} = err;
     console.log(err);
     const { status = 400 } = err;
     if (!err.message) {
