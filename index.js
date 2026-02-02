@@ -24,6 +24,8 @@ const campgroundRoutes = require('./routes/campground.js')
 const reviewsRoutes = require('./routes/reviews.js');
 const userRoutes = require('./routes/users.js');
 
+const {MongoStore} = require('connect-mongo')
+
 
 
 app.set('query parser', 'extended');
@@ -31,7 +33,10 @@ app.set('query parser', 'extended');
 
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/Yelp-camp');
+const dBUrl = process.env.DB_URL 
+// const dbUrl = "mongodb://127.0.0.1:27017/Yelp-camp"
+
+mongoose.connect(dbUrl);
 
 
 // to see if the mongo connects 
@@ -41,7 +46,23 @@ db.once('open', () => {
     console.log('Database connected');
 })
 
+// to make session not be used in memory and be stored in the mongo database 
+// add store to the session config
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: 'better-secret'
+    }
+});
+
+// store.on('error', function (e) {
+//     console.log('session error');
+// })
+
+
 const sessionConfig = {
+    store,
     name: 'session',
     secret: 'better-secret',
     resave: false,

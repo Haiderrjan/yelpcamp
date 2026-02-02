@@ -45,4 +45,6 @@ module.exports = function sanitizeV5(options = {}) {
  
     next();
   };
-};
+}
+
+
