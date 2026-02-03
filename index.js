@@ -6,7 +6,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const app = express()
-const port = 8080;
 const mongoose = require('mongoose')
 const path = require('path')
 const methodOverride = require('method-override')
@@ -33,8 +32,8 @@ app.set('query parser', 'extended');
 
 
 
-const dBUrl = process.env.DB_URL 
-// const dbUrl = "mongodb://127.0.0.1:27017/Yelp-camp"
+const dbUrl = process.env.DB_URL || "mongodb://127.0.0.1:27017/Yelp-camp"
+
 
 mongoose.connect(dbUrl);
 
@@ -46,13 +45,15 @@ db.once('open', () => {
     console.log('Database connected');
 })
 
+const secret = process.env.secret || 'better-secret'
+
 // to make session not be used in memory and be stored in the mongo database 
 // add store to the session config
 const store = MongoStore.create({
     mongoUrl: dbUrl,
     touchAfter: 24 * 60 * 60,
     crypto: {
-        secret: 'better-secret'
+        secret: secret
     }
 });
 
@@ -64,7 +65,7 @@ const store = MongoStore.create({
 const sessionConfig = {
     store,
     name: 'session',
-    secret: 'better-secret',
+    secret,
     resave: false,
      saveUninitialized: true,
      cookies: {
@@ -179,7 +180,7 @@ app.use((err, req, res, next) => {
 
 
 
-
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
     console.log(`on port ${port}`);
 })
